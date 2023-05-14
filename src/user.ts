@@ -3,6 +3,7 @@ import process from "process";
 export type UserState = {
   mode: "text" | "image" | "re-draw";
   userImage?: URL;
+  userImageMask?: URL;
 };
 
 const mem: {
@@ -91,5 +92,12 @@ export const addUserImage = (id: number, image: URL) => {
   setUserState(id, {
     ...userState,
     userImage: image,
+  });
+};
+export const addUserImageMask = (id: number, image: URL) => {
+  const userState = getUserState(id);
+  setUserState(id, {
+    ...userState,
+    userImageMask: image,
   });
 };
