@@ -1,3 +1,6 @@
 .env
+.env.dev
+.env.prod
 .idea
 node_modules
+.DS_Store

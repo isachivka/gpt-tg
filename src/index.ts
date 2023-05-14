@@ -1,24 +1,27 @@
-import express, { Request, Response } from "express";
-import axios from "axios";
+require("dotenv").config();
+
+import express from "express";
 import { Telegraf } from "telegraf";
 import * as process from "process";
 import {
   isAuthorized,
   isUserExist,
   newUser,
-  authorize,
-  getHistory,
-  appendHistory,
   clearHistory,
+  getUserState,
+  changeUserMode,
 } from "./user";
-
-require("dotenv").config();
+import { auth } from "./auth";
+import { textMode } from "./text";
+import { imageMode } from "./image";
+import { onPhotoFile, reDrawMode } from "./re-draw";
 
 const expressApp = express();
 const port = process.env.PORT || 3000;
 
 expressApp.use(express.json());
 
+export type Bot = typeof bot;
 const bot = new Telegraf(process.env.BOT_KEY);
 
 bot.command("start", (ctx) => {
@@ -43,49 +46,44 @@ bot.command("start", (ctx) => {
 
 bot.command("new_dialog", (ctx) => {
   clearHistory(ctx.from.id);
-  bot.telegram.sendMessage(ctx.chat.id, "Ok", {});
+  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
 });
 
-bot.hears(/.*/, (ctx) => {
-  if (!isAuthorized(ctx.from.id)) {
-    if (ctx.update.message.text === process.env.ACCESS_KEY) {
-      authorize(ctx.from.id);
-      bot.telegram.sendMessage(
-        ctx.chat.id,
-        "You are authorized. Give me your prompt",
-        {}
-      );
-    }
-  } else {
-    const userPrompt = ctx.update.message.text;
-    appendHistory(ctx.from.id, "user", userPrompt);
+bot.command("image_mode", (ctx) => {
+  changeUserMode(ctx.from.id, "image");
+  bot.telegram.sendMessage(ctx.chat.id, "Give me your prompt to draw:", {});
+});
 
-    const config = {
-      method: "post",
-      url: "https://api.openai.com/v1/chat/completions",
-      headers: {
-        Authorization: "Bearer " + process.env.AI_KEY,
-        "Content-Type": "application/json",
-      },
-      data: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: getHistory(ctx.from.id),
-        temperature: 0.7,
-      }),
-    };
-    axios(config)
-      .then((response) => {
-        const choice = response.data.choices[0];
-        appendHistory(ctx.from.id, choice.message.role, choice.message.content);
-        bot.telegram.sendMessage(ctx.chat.id, choice.message.content, {});
-      })
-      .catch(function (error) {
-        bot.telegram.sendMessage(
-          ctx.chat.id,
-          "Error: " + JSON.stringify(error),
-          {}
-        );
-      });
+bot.command("text_mode", (ctx) => {
+  changeUserMode(ctx.from.id, "text");
+  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
+});
+
+bot.command("re_draw_mode", (ctx) => {
+  changeUserMode(ctx.from.id, "re-draw");
+  bot.telegram.sendMessage(ctx.chat.id, "Give me your image to re-draw:", {});
+});
+
+// @ts-ignore
+bot.drop(onPhotoFile(bot));
+
+bot.hears(/.*/, (ctx) => {
+  if (!auth(ctx.from.id, ctx.chat.id, ctx.update.message.text, bot)) {
+    return;
+  }
+
+  switch (getUserState(ctx.from.id).mode) {
+    case "text":
+      textMode(ctx, bot);
+      break;
+    case "image":
+      imageMode(ctx, bot);
+      break;
+    case "re-draw":
+      reDrawMode(ctx, bot);
+      break;
+    default:
+      textMode(ctx, bot);
   }
 });
 
