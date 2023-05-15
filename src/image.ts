@@ -44,6 +44,14 @@ export const imageMode = (
     )
     .then((response) => {
       ctx.replyWithPhoto(response.data.data[0].url);
+    })
+    .catch((err) => {
+      bot.telegram.sendMessage(ctx.chat.id, "❗️" + err.message, {});
+      bot.telegram.sendMessage(
+        ctx.chat.id,
+        "❗️" + err.response.data.error.message,
+        {}
+      );
     });
 
   bot.telegram.sendMessage(ctx.chat.id, "Your mode changed back to text", {});

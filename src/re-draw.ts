@@ -1,6 +1,11 @@
 require("dotenv").config();
 import * as process from "process";
-import { addUserImage, addUserImageMask, getUserState } from "./user";
+import {
+  addUserImage,
+  addUserImageMask,
+  changeUserMode,
+  getUserState,
+} from "./user";
 import type { Bot } from "./index";
 import { Telegram } from "telegraf";
 import fs, { createReadStream } from "fs";
@@ -68,12 +73,15 @@ export const reDrawMode = (
           fs.unlink(filePathMask, (err) => {
             if (err) console.error(err);
           });
+          bot.telegram.sendMessage(
+            ctx.chat.id,
+            "Your mode changed back to text",
+            {}
+          );
+
+          changeUserMode(ctx.from.id, "text");
         })
         .catch((err) => {
-          console.log(err.request);
-          console.log(err.response);
-          console.log(JSON.stringify(err));
-          console.log(JSON.stringify(err.data));
           bot.telegram.sendMessage(ctx.chat.id, "❗️" + err.message, {});
           bot.telegram.sendMessage(
             ctx.chat.id,

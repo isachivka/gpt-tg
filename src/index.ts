@@ -59,6 +59,11 @@ bot.command("text_mode", (ctx) => {
   bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
 });
 
+bot.command("gpt4_mode", (ctx) => {
+  changeUserMode(ctx.from.id, "gpt4");
+  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
+});
+
 bot.command("re_draw_mode", (ctx) => {
   changeUserMode(ctx.from.id, "re-draw");
   bot.telegram.sendMessage(ctx.chat.id, "Give me your image to re-draw:", {});
@@ -72,7 +77,10 @@ bot.hears(/.*/, (ctx) => {
     return;
   }
 
-  switch (getUserState(ctx.from.id).mode) {
+  const userState = getUserState(ctx.from.id);
+
+  switch (userState.mode) {
+    case "gpt4":
     case "text":
       textMode(ctx, bot);
       break;

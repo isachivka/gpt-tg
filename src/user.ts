@@ -1,7 +1,7 @@
 import process from "process";
 
 export type UserState = {
-  mode: "text" | "image" | "re-draw";
+  mode: "text" | "image" | "re-draw" | "gpt4";
   userImage?: URL;
   userImageMask?: URL;
 };
