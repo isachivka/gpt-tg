@@ -1,5 +1,5 @@
 import Sequelize from "sequelize";
-import cfg from "../../database/config";
+import cfg from "./config";
 import user from "./user";
 
 const db = {};
