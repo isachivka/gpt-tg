@@ -3,11 +3,10 @@ import { textMode } from "../modes";
 import { openai } from "../openai";
 import { Reply, UpdateCtx } from "../types";
 import { locales } from "../locales/locales";
-import { usersStorage } from "../user/usersStorage";
 import { imageModeSettings } from "../const";
+import { User } from "../user/user";
 
-export const imageHandler = (ctx: UpdateCtx & Reply) => {
-  const user = usersStorage.get(ctx.from.id);
+export const imageHandler = (ctx: UpdateCtx & Reply, user: User) => {
   user.changeMode(textMode);
   return openai
     .createImage({

@@ -2,10 +2,9 @@ import { UpdateCtx } from "../types";
 import { locales } from "../locales/locales";
 import { textMode } from "../modes";
 import { send } from "../bot";
-import { usersStorage } from "../user/usersStorage";
+import { User } from "../user/user";
 
-export const temperatureHandler = (ctx: UpdateCtx) => {
-  const user = usersStorage.get(ctx.from.id);
+export const temperatureHandler = (ctx: UpdateCtx, user: User) => {
   const text = ctx.update.message.text;
   const temperature = Number(text);
   if (isNaN(temperature)) {

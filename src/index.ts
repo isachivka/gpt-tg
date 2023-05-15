@@ -23,8 +23,9 @@ const expressApp = express();
 
 expressApp.use(express.json());
 
-bot.command(commands.start, (ctx) => {
-  if (usersStorage.get(ctx.from.id).isAuthorized()) {
+bot.command(commands.start, async (ctx) => {
+  const user = await usersStorage.get(ctx.from.id);
+  if (user.isAuthorized()) {
     return send(ctx, locales.en.authWelcome);
   } else {
     return send(ctx, locales.en.woAuthWelcome);
@@ -37,13 +38,19 @@ bot.command(commands.stats, (ctx) => {
 
 modesArray.forEach((mode) => {
   bot.command(mode, (ctx) => {
-    usersStorage.get(ctx.from.id).changeMode(mode);
-    return send(ctx, modes[mode].text);
+    return usersStorage
+      .get(ctx.from.id)
+      .then((user) => {
+        user.changeMode(mode);
+      })
+      .then(() => {
+        return send(ctx, modes[mode].text);
+      });
   });
 });
 
-bot.command(commands.newDialog, (ctx) => {
-  const user = usersStorage.get(ctx.from.id);
+bot.command(commands.newDialog, async (ctx) => {
+  const user = await usersStorage.get(ctx.from.id);
   user.clearHistory();
   return send(ctx, locales.en.ok);
 });
@@ -51,8 +58,8 @@ bot.command(commands.newDialog, (ctx) => {
 // @ts-ignore
 bot.drop(onPhotoFile);
 
-bot.hears(/.*/, (ctx) => {
-  const user = usersStorage.get(ctx.from.id);
+bot.hears(/.*/, async (ctx) => {
+  const user = await usersStorage.get(ctx.from.id);
 
   if (!user.authorize(ctx.update.message.text, ctx.chat.id)) {
     return;
@@ -60,16 +67,16 @@ bot.hears(/.*/, (ctx) => {
 
   switch (user.getMode()) {
     case setTemperatureMode:
-      return temperatureHandler(ctx);
+      return temperatureHandler(ctx, user);
     case gpt4Mode:
     case textMode:
-      return textHandler(ctx);
+      return textHandler(ctx, user);
     case imageMode:
-      return imageHandler(ctx);
+      return imageHandler(ctx, user);
     case reDrawMode:
-      return reDrawHandler(ctx);
+      return reDrawHandler(ctx, user);
     default:
-      return textHandler(ctx);
+      return textHandler(ctx, user);
   }
 });
 

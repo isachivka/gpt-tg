@@ -2,6 +2,7 @@ import { Mode, textMode } from "../modes";
 import process from "process";
 import { bot } from "../bot";
 import { locales } from "../locales/locales";
+import pg from "../pg";
 
 const initialUserHistory = [
   {
@@ -23,10 +24,11 @@ export class User {
   userImage?: URL = undefined;
   userImageMask?: URL = undefined;
 
-  constructor(id: number) {
+  constructor(id: number, auth: boolean) {
     this.id = id;
     this.mode = textMode;
-    this.auth = JSON.parse(process.env.AUTHORIZED_IDS).indexOf(id) !== -1;
+    this.auth =
+      auth || JSON.parse(process.env.AUTHORIZED_IDS).indexOf(id) !== -1;
   }
 
   public authorize(key: string, chatId: number) {
@@ -49,6 +51,10 @@ export class User {
       return false;
     }
 
+    pg.user.create({
+      id: this.id,
+      auth: true,
+    });
     bot.telegram.sendMessage(chatId, locales.en.authSuccess, {});
     this.auth = true;
     return true;

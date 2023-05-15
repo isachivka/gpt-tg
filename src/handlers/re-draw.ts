@@ -8,9 +8,9 @@ import type { Reply, UpdateCtx, UpdateDocCtx } from "../types";
 import { locales } from "../locales/locales";
 import { usersStorage } from "../user/usersStorage";
 import { reDrawModeSettings } from "../const";
+import { User } from "../user/user";
 
-export const reDrawHandler = (ctx: UpdateCtx & Reply) => {
-  const user = usersStorage.get(ctx.from.id);
+export const reDrawHandler = (ctx: UpdateCtx & Reply, user: User) => {
   const { text } = ctx.update.message;
   if (
     user.getUserImage() === undefined ||
@@ -45,7 +45,7 @@ export const reDrawHandler = (ctx: UpdateCtx & Reply) => {
 };
 
 export const onPhotoFile = (ctx: UpdateDocCtx): boolean => {
-  const user = usersStorage.get(ctx.from.id);
+  const user = usersStorage.getUser_UNSAFE(ctx.from.id);
 
   if (ctx.update?.message?.document === undefined) {
     return false;

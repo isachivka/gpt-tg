@@ -2,10 +2,9 @@ import { send } from "../bot";
 import { gpt4Mode, textMode } from "../modes";
 import { openai } from "../openai";
 import type { UpdateCtx } from "../types";
-import { usersStorage } from "../user/usersStorage";
+import { User } from "../user/user";
 
-export const textHandler = (ctx: UpdateCtx) => {
-  const user = usersStorage.get(ctx.from.id);
+export const textHandler = (ctx: UpdateCtx, user: User) => {
   user.appendHistory("user", ctx.update.message.text);
 
   try {
