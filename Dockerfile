@@ -9,5 +9,5 @@ RUN npm run build
 
 EXPOSE 3000
 
-ENTRYPOINT ["node", "dist/index.js"]
+ENTRYPOINT npm run migrate && node dist/index.js
 
