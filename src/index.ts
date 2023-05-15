@@ -1,98 +1,74 @@
 require("dotenv").config();
 
+import { bot, send } from "./bot";
+import { commands } from "./const";
+import { usersStorage } from "./user/usersStorage";
+import { textHandler } from "./handlers/text";
 import express from "express";
-import { Telegraf } from "telegraf";
-import * as process from "process";
 import {
-  isAuthorized,
-  isUserExist,
-  newUser,
-  clearHistory,
-  getUserState,
-  changeUserMode,
-} from "./user";
-import { auth } from "./auth";
-import { textMode } from "./text";
-import { imageMode } from "./image";
-import { onPhotoFile, reDrawMode } from "./re-draw";
+  gpt4Mode,
+  imageMode,
+  modes,
+  modesArray,
+  reDrawMode,
+  setTemperatureMode,
+  textMode,
+} from "./modes";
+import { onPhotoFile, reDrawHandler } from "./handlers/re-draw";
+import { imageHandler } from "./handlers/image";
+import { locales } from "./locales/locales";
+import { temperatureHandler } from "./handlers/temperature";
 
 const expressApp = express();
-const port = process.env.PORT || 3000;
 
 expressApp.use(express.json());
 
-export type Bot = typeof bot;
-const bot = new Telegraf(process.env.BOT_KEY);
-
-bot.command("start", (ctx) => {
-  console.log(ctx.from.id);
-  if (isAuthorized(ctx.from.id)) {
-    bot.telegram.sendMessage(
-      ctx.chat.id,
-      "Hi, I'm gpt-3.5-turbo by OpenAI. Give me your prompt",
-      {}
-    );
+bot.command(commands.start, (ctx) => {
+  if (usersStorage.get(ctx.from.id).isAuthorized()) {
+    return send(ctx, locales.en.authWelcome);
   } else {
-    if (!isUserExist(ctx.from.id)) {
-      newUser(ctx.from.id);
-    }
-    bot.telegram.sendMessage(
-      ctx.chat.id,
-      "Hi, I'm gpt-3.5-turbo by OpenAI. Before we start give me your access key",
-      {}
-    );
+    return send(ctx, locales.en.woAuthWelcome);
   }
 });
 
-bot.command("new_dialog", (ctx) => {
-  clearHistory(ctx.from.id);
-  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
+modesArray.forEach((mode) => {
+  bot.command(mode, (ctx) => {
+    usersStorage.get(ctx.from.id).changeMode(mode);
+    return send(ctx, modes[mode].text);
+  });
 });
 
-bot.command("image_mode", (ctx) => {
-  changeUserMode(ctx.from.id, "image");
-  bot.telegram.sendMessage(ctx.chat.id, "Give me your prompt to draw:", {});
-});
-
-bot.command("text_mode", (ctx) => {
-  changeUserMode(ctx.from.id, "text");
-  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
-});
-
-bot.command("gpt4_mode", (ctx) => {
-  changeUserMode(ctx.from.id, "gpt4");
-  bot.telegram.sendMessage(ctx.chat.id, "👌🏻", {});
-});
-
-bot.command("re_draw_mode", (ctx) => {
-  changeUserMode(ctx.from.id, "re-draw");
-  bot.telegram.sendMessage(ctx.chat.id, "Give me your image to re-draw:", {});
+bot.command(commands.newDialog, (ctx) => {
+  const user = usersStorage.get(ctx.from.id);
+  user.clearHistory();
+  return send(ctx, locales.en.ok);
 });
 
 // @ts-ignore
-bot.drop(onPhotoFile(bot));
+bot.drop(onPhotoFile);
 
 bot.hears(/.*/, (ctx) => {
-  if (!auth(ctx.from.id, ctx.chat.id, ctx.update.message.text, bot)) {
+  const user = usersStorage.get(ctx.from.id);
+
+  if (!user.authorize(ctx.update.message.text, ctx.chat.id)) {
     return;
   }
 
-  const userState = getUserState(ctx.from.id);
-
-  switch (userState.mode) {
-    case "gpt4":
-    case "text":
-      textMode(ctx, bot);
-      break;
-    case "image":
-      imageMode(ctx, bot);
-      break;
-    case "re-draw":
-      reDrawMode(ctx, bot);
-      break;
+  switch (user.getMode()) {
+    case setTemperatureMode:
+      return temperatureHandler(ctx);
+    case gpt4Mode:
+    case textMode:
+      return textHandler(ctx);
+    case imageMode:
+      return imageHandler(ctx);
+    case reDrawMode:
+      return reDrawHandler(ctx);
     default:
-      textMode(ctx, bot);
+      return textHandler(ctx);
   }
 });
 
-bot.launch();
+bot.launch().then(() => {
+  console.log("Bot started");
+});
