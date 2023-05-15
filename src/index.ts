@@ -31,6 +31,10 @@ bot.command(commands.start, (ctx) => {
   }
 });
 
+bot.command(commands.stats, (ctx) => {
+  return send(ctx, "Version: " + require("../package.json").version);
+});
+
 modesArray.forEach((mode) => {
   bot.command(mode, (ctx) => {
     usersStorage.get(ctx.from.id).changeMode(mode);

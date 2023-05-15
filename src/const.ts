@@ -23,4 +23,5 @@ export const commands = {
   reDrawMode,
   start: "start",
   newDialog: "new_dialog",
+  stats: "stats",
 };
