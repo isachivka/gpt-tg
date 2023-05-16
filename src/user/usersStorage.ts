@@ -10,15 +10,12 @@ export class UsersStorage {
 
   public get(id: number): Promise<User> {
     if (!this.users[id]) {
-      return pg.user
-        .findOne({
-          where: { userId: id },
-        })
-        .then((user) => {
-          // @ts-ignore
-          this.users[id] = new User(id, user?.auth || false);
-          return this.users[id];
-        });
+      return pg.User.findOne({
+        where: { userId: id },
+      }).then((user) => {
+        this.users[id] = new User(id, user?.auth || false);
+        return this.users[id];
+      });
     }
 
     return Promise.resolve(this.users[id]);

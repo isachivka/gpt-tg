@@ -7,3 +7,5 @@ node_modules
 dist
 images
 dist/images
+front/node_modules
+static
