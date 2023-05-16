@@ -1,3 +1,5 @@
+import path from "path";
+
 require("dotenv").config();
 
 import { bot, send } from "./bot";
@@ -22,6 +24,11 @@ import { temperatureHandler } from "./handlers/temperature";
 const expressApp = express();
 
 expressApp.use(express.json());
+expressApp.use("/", express.static(path.resolve(__dirname, "../static")));
+
+expressApp.listen(3000, () => {
+  console.log("Listen 3000");
+});
 
 bot.command(commands.start, async (ctx) => {
   const user = await usersStorage.get(ctx.from.id);

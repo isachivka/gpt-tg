@@ -51,8 +51,8 @@ export class User {
       return false;
     }
 
-    pg.user.create({
-      id: this.id,
+    pg.User.create({
+      userId: this.id,
       auth: true,
     });
     bot.telegram.sendMessage(chatId, locales.en.authSuccess, {});

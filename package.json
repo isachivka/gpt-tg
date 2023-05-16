@@ -7,10 +7,10 @@
     "build": "tsc",
     "start": "npm run migrate && node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "dockerhub": "docker build -t isachivka/gpt --platform=linux/amd64 . && docker push isachivka/gpt",
+    "docker": "docker build -t isachivka/gpt --platform=linux/amd64 .",
     "migrate": "sequelize-cli db:migrate",
     "prepare": "husky install",
-    "bump": "npm version patch"
+    "bump-push": "npm version patch && git push --follow-tags"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +22,7 @@
     "openai": "^3.1.0",
     "pg": "^8.5.1",
     "request": "^2.88.2",
-    "sequelize": "^6.5.0",
+    "sequelize": "^6.31.1",
     "telegraf": "^4.12.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
@@ -34,6 +34,6 @@
     "husky": "^8.0.3",
     "node-fetch": "^2.6.11",
     "prettier": "2.8.8",
-    "sequelize-cli": "^6.2.0"
+    "sequelize-cli": "^6.6.0"
   }
 }
