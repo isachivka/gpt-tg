@@ -1,12 +1,12 @@
 {
   "name": "gpt",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "start": "npm run migrate && node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon src/index.ts & cd front && npm run dev",
     "docker": "docker build -t isachivka/gpt --platform=linux/amd64 .",
     "migrate": "sequelize-cli db:migrate",
     "prepare": "husky install",

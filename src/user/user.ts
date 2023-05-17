@@ -5,11 +5,11 @@ import { locales } from "../locales/locales";
 import pg from "../pg";
 
 const initialUserHistory = [
-  {
-    role: "user" as const,
-    content: locales.en.prePrompt,
-  },
-];
+  // {
+  //   role: "user" as const,
+  //   content: locales.en.prePrompt,
+  // },
+] as const;
 
 export class User {
   mode: Mode;
