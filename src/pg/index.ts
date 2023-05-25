@@ -1,6 +1,7 @@
 import { Sequelize } from "sequelize";
 import cfg from "./config";
 import { User, initUser } from "./user";
+import { Key, initKey } from "./key";
 
 const env =
   (process.env.NODE_ENV as "development" | "production") ||
@@ -18,9 +19,11 @@ const sequelize = new Sequelize(
 );
 
 initUser(sequelize);
+initKey(sequelize);
 
 const db = {
   User,
+  Key,
 };
 
 export default db;

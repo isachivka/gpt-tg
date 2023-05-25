@@ -7,6 +7,7 @@ import { commands } from "./const";
 import { usersStorage } from "./user/usersStorage";
 import { textHandler } from "./handlers/text";
 import express from "express";
+import cors from "cors";
 import {
   gpt4Mode,
   imageMode,
@@ -20,13 +21,18 @@ import { onPhotoFile, reDrawHandler } from "./handlers/re-draw";
 import { imageHandler } from "./handlers/image";
 import { locales } from "./locales/locales";
 import { temperatureHandler } from "./handlers/temperature";
+import { authMiddleware } from "./api/authMiddleware";
+import api from "./api/api";
 
-const expressApp = express();
+const app = express();
 
-expressApp.use(express.json());
-expressApp.use("/", express.static(path.resolve(__dirname, "../static")));
+app.use(cors());
+app.use(express.json());
+app.use("/", express.static(path.resolve(__dirname, "../static")));
+app.use(authMiddleware);
+app.use(api);
 
-expressApp.listen(3000, () => {
+app.listen(3000, () => {
   console.log("Listen 3000");
 });
 
@@ -67,8 +73,12 @@ bot.drop(onPhotoFile);
 
 bot.hears(/.*/, async (ctx) => {
   const user = await usersStorage.get(ctx.from.id);
+  const isAuthorized = await user.authorize(
+    ctx.update.message.text,
+    ctx.chat.id
+  );
 
-  if (!user.authorize(ctx.update.message.text, ctx.chat.id)) {
+  if (!isAuthorized) {
     return;
   }
 

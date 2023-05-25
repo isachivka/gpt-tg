@@ -21,10 +21,11 @@ export const useToken = () => {
 
 export const TokenStorage = (props: { children: ReactNode }) => {
   const [storage, setStorage] = useState<Storage>({
-    token: undefined,
+    token: localStorage.getItem("ACCESS_KEY"),
   });
   const setToken = useCallback(
     (token: string) => {
+      localStorage.setItem("ACCESS_KEY", token);
       setStorage({
         ...storage,
         token,

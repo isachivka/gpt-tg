@@ -3,6 +3,7 @@ import process from "process";
 import { bot } from "../bot";
 import { locales } from "../locales/locales";
 import pg from "../pg";
+import { Key } from "../pg/key";
 
 const initialUserHistory = [
   // {
@@ -31,7 +32,7 @@ export class User {
       auth || JSON.parse(process.env.AUTHORIZED_IDS).indexOf(id) !== -1;
   }
 
-  public authorize(key: string, chatId: number) {
+  public async authorize(token: string, chatId: number) {
     if (this.auth) {
       return true;
     }
@@ -45,7 +46,8 @@ export class User {
       return false;
     }
 
-    if (key !== process.env.ACCESS_KEY) {
+    const key = await Key.findOne({ where: { token } });
+    if (key === null) {
       bot.telegram.sendMessage(chatId, locales.en.wrong, {});
       this.badAttempts++;
       return false;
@@ -57,7 +59,7 @@ export class User {
     });
     bot.telegram.sendMessage(chatId, locales.en.authSuccess, {});
     this.auth = true;
-    return true;
+    return false;
   }
 
   public isAuthorized() {
