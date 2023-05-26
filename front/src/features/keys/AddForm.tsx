@@ -1,31 +1,33 @@
-import { useForm } from "react-hook-form";
-import { useToken } from "../auth/TokenStorage.tsx";
-import { endPoints } from "../../helpers/endPoints.ts";
+import { nanoid } from 'nanoid';
+import { useForm } from 'react-hook-form';
+
+import { endPoints } from '../../helpers/endPoints.ts';
+import { useToken } from '../auth/TokenStorage.tsx';
 
 type AddFormProps = {
-  appendKey: (key: { telegramId: number; token: string; id: number }) => void;
+  appendKey: (key: { token: string; id: number; comment: string }) => void;
 };
 
 export const AddForm = (props: AddFormProps) => {
   const { register, handleSubmit, reset } = useForm<{
-    telegramId: number;
-    token: string;
+    comment: string;
   }>();
   const { storage } = useToken();
   const { token } = storage;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      const key = { ...data, token: nanoid(36) } as const;
       const response = await fetch(endPoints.addToken, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(key),
       });
       const json = await response.json();
-      props.appendKey(json);
+      props.appendKey({ ...json, token: key.token });
       reset();
       console.log(json);
     } catch (error) {
@@ -35,12 +37,10 @@ export const AddForm = (props: AddFormProps) => {
 
   return (
     <form onSubmit={onSubmit}>
-      <label htmlFor="telegramId">Telegram ID:</label>
-      <input type="number" id="telegramId" {...register("telegramId")} />
-
-      <label htmlFor="token">Token:</label>
-      <input type="text" id="token" {...register("token")} />
-
+      <label>
+        <span>Comment:</span>
+        <input type="text" id="comment" {...register('comment')} />
+      </label>
       <button type="submit">Submit</button>
     </form>
   );

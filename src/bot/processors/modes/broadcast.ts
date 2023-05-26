@@ -20,7 +20,7 @@ export const broadcastHandler = async (
   }
 
   const users = await db.User.findAll();
-  const chatIds = users.map((user) => user.chatId || user.userId);
+  const chatIds = users.map((user) => user.userId);
 
   await Promise.all(
     chatIds.map((chatId) => {

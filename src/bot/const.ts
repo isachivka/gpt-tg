@@ -16,8 +16,8 @@ export type ModeCommands =
 export type OtherCommands = typeof start | typeof stats | typeof newDialog;
 
 /*
+set_temperature_mode - Set temperature
 image_mode - Image creation mode
 text_mode - Chat mode
 new_dialog - New dialog
-set_temperature_mode - Set temperature
 */

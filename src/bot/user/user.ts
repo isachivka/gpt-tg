@@ -50,11 +50,15 @@ export class User {
     pg.User.create({
       userId: this.id,
       auth: true,
-      chatId: this.id,
+      token: token,
     });
     bot.telegram.sendMessage(this.id, locales.en.authSuccess, {});
     this.auth = true;
     return false;
+  }
+
+  public unauthorize() {
+    this.auth = false;
   }
 
   public isAuthorized() {
