@@ -1,9 +1,10 @@
-import { Mode, textMode } from "../modes";
-import process from "process";
-import { bot } from "../bot";
-import { locales } from "../locales/locales";
-import pg from "../pg";
-import { Key } from "../pg/key";
+import process from 'process';
+
+import { bot } from '../bot';
+import { locales } from '../locales/locales';
+import { Mode, textMode } from '../modes';
+import pg from '../pg';
+import { Key } from '../pg/key';
 
 const initialUserHistory = [
   // {
@@ -19,7 +20,7 @@ export class User {
   badAttempts: number = 0;
   temperature: number = 0.7;
   timeout: ReturnType<typeof setTimeout>;
-  history: { role: "user" | "assistant" | "system"; content: string }[] = [
+  history: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
     ...initialUserHistory,
   ];
   userImage?: URL = undefined;
@@ -56,6 +57,7 @@ export class User {
     pg.User.create({
       userId: this.id,
       auth: true,
+      chatId,
     });
     bot.telegram.sendMessage(chatId, locales.en.authSuccess, {});
     this.auth = true;
@@ -74,7 +76,7 @@ export class User {
     return this.mode;
   }
 
-  public appendHistory(role: "user" | "assistant" | "system", content: string) {
+  public appendHistory(role: 'user' | 'assistant' | 'system', content: string) {
     this.history.push({ role, content });
   }
 

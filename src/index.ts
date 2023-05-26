@@ -1,14 +1,21 @@
-import path from "path";
+import './setup';
 
-require("dotenv").config();
+import cors from 'cors';
+import express from 'express';
+import path from 'path';
 
-import { bot, send } from "./bot";
-import { commands } from "./const";
-import { usersStorage } from "./user/usersStorage";
-import { textHandler } from "./handlers/text";
-import express from "express";
-import cors from "cors";
+import api from './api/api';
+import { authMiddleware } from './api/authMiddleware';
+import { bot, send } from './bot';
+import { commands } from './const';
+import { broadcastHandler } from './handlers/broadcast';
+import { imageHandler } from './handlers/image';
+import { onPhotoFile, reDrawHandler } from './handlers/re-draw';
+import { temperatureHandler } from './handlers/temperature';
+import { textHandler } from './handlers/text';
+import { locales } from './locales/locales';
 import {
+  broadcast,
   gpt4Mode,
   imageMode,
   modes,
@@ -16,24 +23,19 @@ import {
   reDrawMode,
   setTemperatureMode,
   textMode,
-} from "./modes";
-import { onPhotoFile, reDrawHandler } from "./handlers/re-draw";
-import { imageHandler } from "./handlers/image";
-import { locales } from "./locales/locales";
-import { temperatureHandler } from "./handlers/temperature";
-import { authMiddleware } from "./api/authMiddleware";
-import api from "./api/api";
+} from './modes';
+import { usersStorage } from './user/usersStorage';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/", express.static(path.resolve(__dirname, "../static")));
+app.use('/', express.static(path.resolve(__dirname, '../static')));
 app.use(authMiddleware);
 app.use(api);
 
 app.listen(3000, () => {
-  console.log("Listen 3000");
+  console.log('Listen 3000');
 });
 
 bot.command(commands.start, async (ctx) => {
@@ -46,7 +48,7 @@ bot.command(commands.start, async (ctx) => {
 });
 
 bot.command(commands.stats, (ctx) => {
-  return send(ctx, "Version: " + require("../package.json").version);
+  return send(ctx, 'Version: ' + require('../package.json').version);
 });
 
 modesArray.forEach((mode) => {
@@ -83,6 +85,8 @@ bot.hears(/.*/, async (ctx) => {
   }
 
   switch (user.getMode()) {
+    case broadcast:
+      return broadcastHandler(ctx, user);
     case setTemperatureMode:
       return temperatureHandler(ctx, user);
     case gpt4Mode:
@@ -98,5 +102,5 @@ bot.hears(/.*/, async (ctx) => {
 });
 
 bot.launch().then(() => {
-  console.log("Bot started");
+  console.log('Bot started');
 });

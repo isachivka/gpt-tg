@@ -1,1 +1,15 @@
-{}
+{
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "bracketSameLine": false,
+  "importOrder": [
+    "setup",
+    "<THIRD_PARTY_MODULES>",
+    "^[./]"
+  ],
+  "importOrderGroupNamespaceSpecifiers": true,
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}

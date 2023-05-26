@@ -1,6 +1,6 @@
 {
   "name": "gpt",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,6 @@
     "nodemon": "^2.0.22",
     "openai": "^3.1.0",
     "pg": "^8.5.1",
-    "request": "^2.88.2",
     "sequelize": "^6.31.1",
     "telegraf": "^4.12.2",
     "ts-node": "^10.9.1",
@@ -33,6 +32,7 @@
     "@types/express": "^4.17.17",
     "@types/node": "^20.1.4",
     "@types/request": "^2.48.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "husky": "^8.0.3",
     "node-fetch": "^2.6.11",
     "prettier": "2.8.8",
