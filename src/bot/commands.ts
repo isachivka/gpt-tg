@@ -53,7 +53,9 @@ const commands = {
   },
   [broadcast]: { handler: modeHandler(broadcast, code(locales.en.broadcast)) },
   [textMode]: { handler: modeHandler(textMode, code(locales.en.ok)) },
-  [imageMode]: { handler: modeHandler(imageMode, code(locales.en.ok)) },
+  [imageMode]: {
+    handler: modeHandler(imageMode, code(locales.en.drawMessage)),
+  },
   [gpt4Mode]: { handler: modeHandler(gpt4Mode, code(locales.en.ok)) },
   [setTemperatureMode]: {
     handler: modeHandler(setTemperatureMode, code(locales.en.setTemperature)),

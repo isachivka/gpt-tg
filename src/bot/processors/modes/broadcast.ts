@@ -4,6 +4,7 @@ import { code } from 'telegraf/format';
 
 import db from '../../../db';
 import { textMode } from '../../const';
+import { locales } from '../../locales';
 import type { User } from '../../user/user';
 
 export const broadcastHandler = async (
@@ -15,7 +16,7 @@ export const broadcastHandler = async (
     user.changeMode(textMode);
     return bot.telegram.sendMessage(
       user.id,
-      code("You're not authorized to broadcast messages")
+      code(locales.en.broadcastAuthError)
     );
   }
 
@@ -28,5 +29,5 @@ export const broadcastHandler = async (
     })
   );
   user.changeMode(textMode);
-  return bot.telegram.sendMessage(user.id, code('Messages sent'));
+  return bot.telegram.sendMessage(user.id, code(locales.en.broadcastSuccess));
 };

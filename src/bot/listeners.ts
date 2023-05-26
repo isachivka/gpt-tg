@@ -2,7 +2,9 @@ import { Configuration, OpenAIApi } from 'openai';
 import process from 'process';
 import type { Telegraf, Telegram } from 'telegraf';
 import { message } from 'telegraf/filters';
+import { code } from 'telegraf/format';
 
+import { locales } from './locales';
 import { textProcessor } from './processors/text';
 import { voiceProcessor } from './processors/voice';
 import type { UsersStorage } from './user/usersStorage';
@@ -24,8 +26,10 @@ export const initializeListeners = (
       return;
     }
 
+    await bot.telegram.sendMessage(user.id, code(locales.en.audioStarted));
     const url = await telegram.getFileLink(ctx.message.voice.file_id);
     const transcription = await voiceProcessor(openai, user, url);
+    await bot.telegram.sendMessage(user.id, code(transcription));
     return textProcessor(openai, bot, user, transcription);
   });
 
