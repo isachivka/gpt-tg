@@ -1,20 +1,15 @@
-import process from 'process';
+import type { Telegraf } from 'telegraf';
 
-import { bot } from '../bot';
-import { locales } from '../locales/locales';
-import { Mode, textMode } from '../modes';
-import pg from '../pg';
-import { Key } from '../pg/key';
+import pg from '../../db';
+import { Key } from '../../db/key';
+import { textMode } from '../const';
+import type { ModeCommands } from '../const';
+import { locales } from '../locales';
 
-const initialUserHistory = [
-  // {
-  //   role: "user" as const,
-  //   content: locales.en.prePrompt,
-  // },
-] as const;
+const initialUserHistory = [] as const;
 
 export class User {
-  mode: Mode;
+  mode: ModeCommands;
   id: number;
   auth: boolean;
   badAttempts: number = 0;
@@ -23,8 +18,6 @@ export class User {
   history: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
     ...initialUserHistory,
   ];
-  userImage?: URL = undefined;
-  userImageMask?: URL = undefined;
 
   constructor(id: number, auth: boolean) {
     this.id = id;
@@ -33,13 +26,13 @@ export class User {
       auth || JSON.parse(process.env.AUTHORIZED_IDS).indexOf(id) !== -1;
   }
 
-  public async authorize(token: string, chatId: number) {
+  public async authorize(bot: Telegraf, token: string) {
     if (this.auth) {
       return true;
     }
 
     if (this.badAttempts >= 10) {
-      bot.telegram.sendMessage(chatId, locales.en.ban);
+      bot.telegram.sendMessage(this.id, locales.en.ban);
       clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
         this.badAttempts = 0;
@@ -49,7 +42,7 @@ export class User {
 
     const key = await Key.findOne({ where: { token } });
     if (key === null) {
-      bot.telegram.sendMessage(chatId, locales.en.wrong, {});
+      bot.telegram.sendMessage(this.id, locales.en.wrong, {});
       this.badAttempts++;
       return false;
     }
@@ -57,9 +50,9 @@ export class User {
     pg.User.create({
       userId: this.id,
       auth: true,
-      chatId,
+      chatId: this.id,
     });
-    bot.telegram.sendMessage(chatId, locales.en.authSuccess, {});
+    bot.telegram.sendMessage(this.id, locales.en.authSuccess, {});
     this.auth = true;
     return false;
   }
@@ -68,7 +61,7 @@ export class User {
     return this.auth;
   }
 
-  public changeMode(mode: Mode) {
+  public changeMode(mode: ModeCommands) {
     this.mode = mode;
   }
 
@@ -88,27 +81,11 @@ export class User {
     this.history = [...initialUserHistory];
   }
 
-  public addUserImage(image: URL | undefined = undefined) {
-    this.userImage = image;
-  }
-
-  public addUserImageMask(image: URL | undefined = undefined) {
-    this.userImageMask = image;
-  }
-
-  public getUserImage() {
-    return this.userImage;
-  }
-
   public setTemperature(temperature: number) {
     this.temperature = temperature;
   }
 
   public getTemperature() {
     return this.temperature;
-  }
-
-  public getUserImageMask() {
-    return this.userImageMask;
   }
 }

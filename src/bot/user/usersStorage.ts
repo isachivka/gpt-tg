@@ -1,5 +1,5 @@
-import { User } from "./user";
-import pg from "../pg";
+import pg from '../../db';
+import { User } from './user';
 
 export class UsersStorage {
   private users: Record<number, User> = {};
@@ -25,5 +25,3 @@ export class UsersStorage {
     delete this.users[id];
   }
 }
-
-export const usersStorage = new UsersStorage();
