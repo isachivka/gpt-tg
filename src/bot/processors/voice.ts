@@ -15,8 +15,8 @@ export const voiceProcessor = async (
 ) => {
   const rootDir = path.join(process.cwd(), './');
   setFfmpegPath(installer.path);
-  const ogaPath = path.resolve(rootDir, `/voices/${user.id}.oga`);
-  const mp3Path = path.resolve(rootDir, `/voices/${user.id}.mp3`);
+  const ogaPath = path.resolve(rootDir, `voices/${user.id}.oga`);
+  const mp3Path = path.resolve(rootDir, `voices/${user.id}.mp3`);
   await download(voiceUrl.toString(), ogaPath);
   await new Promise<void>((res, rej) => {
     ffmpeg(ogaPath)
