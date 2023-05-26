@@ -3,11 +3,14 @@ import './setup';
 import cors from 'cors';
 import express from 'express';
 import path from 'path';
+import { message } from 'telegraf/filters';
+import { code } from 'telegraf/format';
 
 import api from './api/api';
 import { authMiddleware } from './api/authMiddleware';
 import { bot, send } from './bot';
 import { commands } from './const';
+import { audioHandler, convertVoiceCtxToText } from './handlers/audio';
 import { broadcastHandler } from './handlers/broadcast';
 import { imageHandler } from './handlers/image';
 import { onPhotoFile, reDrawHandler } from './handlers/re-draw';
@@ -24,6 +27,7 @@ import {
   setTemperatureMode,
   textMode,
 } from './modes';
+import { AudioCtx } from './types';
 import { usersStorage } from './user/usersStorage';
 
 const app = express();
@@ -72,6 +76,24 @@ bot.command(commands.newDialog, async (ctx) => {
 
 // @ts-ignore
 bot.drop(onPhotoFile);
+
+bot.on(message('voice'), async (ctx) => {
+  const user = await usersStorage.get(ctx.from.id);
+
+  if (!user.isAuthorized()) {
+    return;
+  }
+
+  ctx.reply(code(locales.en.audioStarted));
+  try {
+    const transcription = await audioHandler(ctx, user);
+    ctx.reply(code(transcription));
+    return textHandler(convertVoiceCtxToText(user.id, transcription), user);
+  } catch (error) {
+    user.changeMode(textMode);
+    return send(ctx, 'Error: ' + JSON.stringify(error));
+  }
+});
 
 bot.hears(/.*/, async (ctx) => {
   const user = await usersStorage.get(ctx.from.id);

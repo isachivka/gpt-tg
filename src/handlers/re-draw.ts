@@ -1,14 +1,15 @@
-import * as process from "process";
-import { send } from "../bot";
-import { reDrawMode, textMode } from "../modes";
-import { Telegram } from "telegraf";
-import { downloadImage, getPaths, removeFiles } from "../utils/download";
-import { openai } from "../openai";
-import type { Reply, UpdateCtx, UpdateDocCtx } from "../types";
-import { locales } from "../locales/locales";
-import { usersStorage } from "../user/usersStorage";
-import { reDrawModeSettings } from "../const";
-import { User } from "../user/user";
+import * as process from 'process';
+import { Telegram } from 'telegraf';
+
+import { send } from '../bot';
+import { reDrawModeSettings } from '../const';
+import { locales } from '../locales/locales';
+import { reDrawMode, textMode } from '../modes';
+import { openai } from '../openai';
+import type { Reply, UpdateCtx, UpdateDocCtx } from '../types';
+import { User } from '../user/user';
+import { usersStorage } from '../user/usersStorage';
+import { download, getPaths, removeFiles } from '../utils/download';
 
 export const reDrawHandler = (ctx: UpdateCtx & Reply, user: User) => {
   const { text } = ctx.update.message;
@@ -22,8 +23,8 @@ export const reDrawHandler = (ctx: UpdateCtx & Reply, user: User) => {
   const { filePath, filePathMask } = getPaths(ctx.from.id);
 
   Promise.all([
-    downloadImage(user.getUserImage().toString(), filePath),
-    downloadImage(user.getUserImageMask().toString(), filePathMask),
+    download(user.getUserImage().toString(), filePath),
+    download(user.getUserImageMask().toString(), filePathMask),
   ] as const).then((imgs) => {
     return openai
       .createImageEdit(imgs[0], text, imgs[1], ...reDrawModeSettings)
@@ -37,8 +38,8 @@ export const reDrawHandler = (ctx: UpdateCtx & Reply, user: User) => {
       })
       .catch((err) => {
         return Promise.all([
-          send(ctx, "❗️" + err.message),
-          send(ctx, "❗️" + err.response?.data?.error?.message),
+          send(ctx, '❗️' + err.message),
+          send(ctx, '❗️' + err.response?.data?.error?.message),
         ]);
       });
   });

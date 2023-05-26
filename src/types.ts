@@ -15,6 +15,14 @@ export type UpdateCtx = Ctx & {
   };
 };
 
+export type AudioCtx = Ctx & {
+  message: {
+    voice?: {
+      file_id: string;
+    };
+  };
+};
+
 export type UpdateDocCtx = Ctx & {
   update?: {
     message?: {
